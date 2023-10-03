@@ -5,8 +5,8 @@ import { Book, SectionInterface } from "../interface/book";
 import styles from "./book.module.css";
 import { Section } from "./Section";
 import { useAuth } from "../auth/auth";
-import CollaboratorModal from "./components/modal";
-import ViewCollaboratorModal from "./components/ViewCollaboratorModal";
+import BookForm from "./form/BookForm";
+import CollaboratorSection from "./Collaboration";
 
 function Book() {
   const localStorageKey = "bookData";
@@ -16,43 +16,12 @@ function Book() {
 
   const [books, setBooks] = useState<Book[]>([]);
   const [currentBook, setCurrentBook] = useState<Book | null>(null);
-  const [newBookData, setNewBookData] = useState({
-    title: "",
-    description: "",
-  });
   const [newSectionData, setNewSectionData] = useState({ title: "" });
   const [isBookFormVisible, setIsBookFormVisible] = useState(true);
   const [isSectionAdded, setIsSectionAdded] = useState(false);
   const [users, setUsers] = useState<{
     [key: string]: { id: number; username: string; role: string };
   }>({});
-
-  const [isCollaboratorModalOpen, setIsCollaboratorModalOpen] = useState(false);
-  const [isViewCollaboratorModalOpen, setIsViewCollaboratorModalOpen] =
-    useState(false);
-
-  // Function to open the "View Collaborators" modal
-  const openCollaboratorModal = () => {
-    setIsViewCollaboratorModalOpen(true);
-  };
-
-  // Function to close the modal
-  const closeCollaboratorModal = () => {
-    setIsViewCollaboratorModalOpen(false);
-  };
-
-  const openCreateCollaboratorModal = () => {
-    setIsCollaboratorModalOpen(true);
-  };
-
-  // Function to close the modal
-  const closeCreateCollaboratorModal = () => {
-    setIsCollaboratorModalOpen(false);
-  };
-
-  const toggleCollaboratorModal = () => {
-    setIsCollaboratorModalOpen(!isCollaboratorModalOpen);
-  };
 
   useEffect(() => {
     if (!authenticated) {
@@ -67,7 +36,6 @@ function Book() {
   };
 
   useEffect(() => {
-    // Fetch the list of users when the component mounts
     fetch("/api/users")
       .then((response) => {
         if (!response.ok) {
@@ -85,7 +53,6 @@ function Book() {
 
   const addCollaborator = (selectedUsername: string) => {
     if (currentBook && selectedUsername) {
-      // Find the user object based on the selected username
       const selectedUser = Object.values(users).find(
         (user) => user.username === selectedUsername
       );
@@ -104,14 +71,11 @@ function Book() {
           ],
         };
         setCurrentBook(updatedBook);
-        // Update the book data in local storage and/or send a request to update the server
-        // ...
       }
     }
   };
 
   const removeCollaborator = (collaboratorId: any) => {
-    // Make an API request to remove the collaborator from the book's collaborators
     if (currentBook) {
       const updatedcollaborators = currentBook.collaborators.filter(
         (collaborator: any) => collaborator.id !== collaboratorId
@@ -121,8 +85,6 @@ function Book() {
         collaborators: updatedcollaborators,
       };
       setCurrentBook(updatedBook);
-      // Update the book data in local storage and/or send requests to update the server
-      // ...
     }
   };
 
@@ -136,7 +98,8 @@ function Book() {
     }
   };
 
-  const createBook = () => {
+  const createBook = (newBookData: any) => {
+    console.log("clicked");
     const newBook: Book = {
       id: Date.now(),
       title: newBookData.title,
@@ -146,10 +109,10 @@ function Book() {
     };
     setBooks([...books, newBook]);
     setCurrentBook(newBook);
-    setNewBookData({ title: "", description: "" });
     setIsBookFormVisible(false);
     updateLocalStorage([...books, newBook]);
   };
+  console.log(books);
 
   const addSection = () => {
     if (!currentBook) return;
@@ -280,108 +243,44 @@ function Book() {
             <article>
               {isBookFormVisible ? (
                 <>
-                  <h2 className={styles.chapterTitle}>Syllaby Book</h2>
-                  {userRole === "Author" && (
-                    <form className={styles.form}>
-                      <label>
-                        Book Name:
-                        <input
-                          type="text"
-                          value={newBookData.title}
-                          onChange={(e) =>
-                            setNewBookData({
-                              ...newBookData,
-                              title: e.target.value,
-                            })
-                          }
-                        />
-                      </label>
-                      <label>
-                        Book Description:
-                        <textarea
-                          value={newBookData.description}
-                          onChange={(e) =>
-                            setNewBookData({
-                              ...newBookData,
-                              description: e.target.value,
-                            })
-                          }
-                        />
-                      </label>
-                      <button
-                        type="button"
-                        onClick={createBook}
-                        disabled={newBookData.title.trim() === ""}
-                      >
-                        Create Book
-                      </button>
-                    </form>
-                  )}
+                  <BookForm onSubmit={createBook} />
                 </>
               ) : (
                 <>
                   <h2 className={styles.chapterTitle}>{currentBook?.title}</h2>
-                  <p>
-                    {currentBook && (
-                      <div className={styles.book}>
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "0.5rem",
-                          }}
-                        >
-                          {userRole === "Author" && !isSectionAdded && (
-                            <button
-                              onClick={addSection}
-                              className={styles.addSectionButton}
-                            >
-                              Add Section +
-                            </button>
-                          )}
-                          {userRole === "Author" && (
-                            <div>
-                              <button
-                                onClick={openCreateCollaboratorModal}
-                                className={styles.addSectionButton}
-                              >
-                                Add Collaborators +
-                              </button>
-                              <CollaboratorModal
-                                users={users}
-                                isOpen={isCollaboratorModalOpen}
-                                onClose={closeCreateCollaboratorModal}
-                                onAddCollaborator={addCollaborator}
-                              />
-                            </div>
-                          )}
-                          {userRole === "Author" && (
-                            <div>
-                              <button
-                                onClick={openCollaboratorModal}
-                                className={styles.addSectionButton}
-                              >
-                                View Collaborators
-                              </button>
-                              <ViewCollaboratorModal
-                                isOpen={isViewCollaboratorModalOpen}
-                                onClose={closeCollaboratorModal}
-                                currentBook={currentBook}
-                                removeCollaborator={removeCollaborator}
-                              />
-                            </div>
-                          )}
-                        </div>
-                        {currentBook.sections.map((section) => (
-                          <Section
-                            key={section.id}
-                            section={section}
-                            onAddSubsection={addSubsection}
-                            onDelete={handleDelete}
-                          />
-                        ))}
+                  {currentBook && (
+                    <div className={styles.book}>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "0.5rem",
+                        }}
+                      >
+                        {userRole === "Author" && !isSectionAdded && (
+                          <button
+                            onClick={addSection}
+                            className={styles.addSectionButton}
+                          >
+                            Add Section +
+                          </button>
+                        )}
+                        <CollaboratorSection
+                          users={users}
+                          currentBook={currentBook}
+                          onAddCollaborator={addCollaborator}
+                          removeCollaborator={removeCollaborator}
+                        />
                       </div>
-                    )}
-                  </p>
+                      {currentBook.sections.map((section) => (
+                        <Section
+                          key={section.id}
+                          section={section}
+                          onAddSubsection={addSubsection}
+                          onDelete={handleDelete}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </>
               )}
             </article>

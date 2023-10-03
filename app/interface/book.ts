@@ -10,6 +10,14 @@ export interface Collaborator {
   username: string;
   role: string;
 }
+
+export interface User {
+  id: number;
+  username: string;
+  password: string;
+  role: string;
+}
+
 export interface SectionInterface {
   id: number;
   title: string;

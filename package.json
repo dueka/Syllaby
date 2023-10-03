@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/bcrypt": "^5.0.0",
     "bcrypt": "^5.1.1",
     "json-server-auth": "^2.1.0",
     "next": "latest",

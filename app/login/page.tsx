@@ -1,19 +1,20 @@
 "use client";
 import React, { FormEvent, useReducer, useState } from "react";
 import { useRouter } from "next/navigation";
-import styles from "./register.module.css";
-import { registrationReducer } from "./reducer/registrationReducer";
+import styles from "../register/register.module.css";
+import { loginReducer } from "./reducer/loginReducer";
+import { useAuth } from "../auth/auth";
 
-// Define the initial state and reducer function
 const initialState = {
   username: "",
   password: "",
 };
 
-function Register() {
+function Login() {
   const router = useRouter();
-  const [formData, dispatch] = useReducer(registrationReducer, initialState);
+  const [formData, dispatch] = useReducer(loginReducer, initialState);
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
   const handleChange = (e: any) => {
     const { name, value } = e.target;
     dispatch({ type: "SET_FIELD", fieldName: name, value });
@@ -21,24 +22,13 @@ function Register() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const { username, password } = formData;
 
+    const { username, password } = formData;
+    console.log("clicied");
     try {
       setLoading(true);
-      const response = await fetch("/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username, password }),
-      });
-
-      if (response.ok) {
-        console.log("Registration submitted successfully");
-        dispatch({ type: "SUBMIT_SUCCESS" });
-      } else {
-        console.error("Registration submission failed");
-      }
+      await login(username, password);
+      router.push("/book");
     } catch (error) {
       console.log("Error", error);
     } finally {
@@ -49,7 +39,7 @@ function Register() {
   return (
     <div className={styles.container}>
       <div className={styles.formContainer}>
-        <h2>Register</h2>
+        <h2>Login</h2>
         <form onSubmit={handleSubmit}>
           <div className={styles.FormGroup}>
             <div className={styles.Label}>Username</div>
@@ -81,14 +71,14 @@ function Register() {
             }}
           >
             <button className={styles.SubmitButton} type="submit">
-              Register
+              Login
             </button>
             or
             <button
               className={styles.SubmitButton}
-              onClick={() => router.push("/login")}
+              onClick={() => router.push("/register")}
             >
-              Login
+              Register
             </button>
             {loading && <div>Loading...</div>}
           </div>
@@ -98,4 +88,4 @@ function Register() {
   );
 }
 
-export default Register;
+export default Login;

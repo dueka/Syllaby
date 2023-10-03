@@ -1,10 +1,13 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Book, SectionInterface } from "../interface/book";
 import styles from "./book.module.css";
 import { Section } from "./Section";
+import { useAuth } from "../auth/auth";
 
-function App() {
+function Book() {
+  const router = useRouter();
   const [books, setBooks] = useState<Book[]>([]);
   const [currentBook, setCurrentBook] = useState<Book | null>(null);
   const [newBookData, setNewBookData] = useState({
@@ -14,6 +17,13 @@ function App() {
   const [newSectionData, setNewSectionData] = useState({ title: "" });
   const [isBookFormVisible, setIsBookFormVisible] = useState(true);
   const [isSectionAdded, setIsSectionAdded] = useState(false);
+  const { authenticated } = useAuth();
+
+  useEffect(() => {
+    if (!authenticated) {
+      router.push("/login");
+    }
+  }, [authenticated, router]);
 
   const createBook = () => {
     const newBook: Book = {
@@ -121,83 +131,85 @@ function App() {
   };
 
   return (
-    <div id={styles.wrapper}>
-      <div id={styles.container}>
-        <section className={styles.openBook}>
-          <header>
-            <h1>Book and Sections</h1>
-          </header>
-          <article>
-            {isBookFormVisible ? (
-              <>
-                <h2 className={styles.chapterTitle}>Syllaby Book</h2>
-                <form className={styles.form}>
-                  <label>
-                    Book Name:
-                    <input
-                      type="text"
-                      value={newBookData.title}
-                      onChange={(e) =>
-                        setNewBookData({
-                          ...newBookData,
-                          title: e.target.value,
-                        })
-                      }
-                    />
-                  </label>
-                  <label>
-                    Book Description:
-                    <textarea
-                      value={newBookData.description}
-                      onChange={(e) =>
-                        setNewBookData({
-                          ...newBookData,
-                          description: e.target.value,
-                        })
-                      }
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    onClick={createBook}
-                    disabled={newBookData.title.trim() === ""}
-                  >
-                    Create Book
-                  </button>
-                </form>
-              </>
-            ) : (
-              <>
-                <h2 className={styles.chapterTitle}>{currentBook?.title}</h2>
-                <p>
-                  {currentBook && (
-                    <div className={styles.book}>
-                      {!isSectionAdded && (
-                        <button
-                          onClick={addSection}
-                          className={styles.addSectionButton}
-                        >
-                          Add Section +
-                        </button>
-                      )}
-                      {currentBook.sections.map((section) => (
-                        <Section
-                          key={section.id}
-                          section={section}
-                          onAddSubsection={addSubsection}
-                          onDelete={handleDelete}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </p>
-              </>
-            )}
-          </article>
-        </section>
+    <>
+      <div id={styles.wrapper}>
+        <div id={styles.container}>
+          <section className={styles.openBook}>
+            <header>
+              <h1>Book and Sections</h1>
+            </header>
+            <article>
+              {isBookFormVisible ? (
+                <>
+                  <h2 className={styles.chapterTitle}>Syllaby Book</h2>
+                  <form className={styles.form}>
+                    <label>
+                      Book Name:
+                      <input
+                        type="text"
+                        value={newBookData.title}
+                        onChange={(e) =>
+                          setNewBookData({
+                            ...newBookData,
+                            title: e.target.value,
+                          })
+                        }
+                      />
+                    </label>
+                    <label>
+                      Book Description:
+                      <textarea
+                        value={newBookData.description}
+                        onChange={(e) =>
+                          setNewBookData({
+                            ...newBookData,
+                            description: e.target.value,
+                          })
+                        }
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={createBook}
+                      disabled={newBookData.title.trim() === ""}
+                    >
+                      Create Book
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <h2 className={styles.chapterTitle}>{currentBook?.title}</h2>
+                  <p>
+                    {currentBook && (
+                      <div className={styles.book}>
+                        {!isSectionAdded && (
+                          <button
+                            onClick={addSection}
+                            className={styles.addSectionButton}
+                          >
+                            Add Section +
+                          </button>
+                        )}
+                        {currentBook.sections.map((section) => (
+                          <Section
+                            key={section.id}
+                            section={section}
+                            onAddSubsection={addSubsection}
+                            onDelete={handleDelete}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </p>
+                </>
+              )}
+            </article>
+          </section>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
-export default App;
+export default Book;

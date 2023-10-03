@@ -1,5 +1,5 @@
 "use client";
-import React, { FormEvent, useReducer, useState } from "react";
+import React, { useReducer, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../register/register.module.css";
 import { loginReducer } from "./reducer/loginReducer";
@@ -20,17 +20,20 @@ function Login() {
     dispatch({ type: "SET_FIELD", fieldName: name, value });
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = async () => {
     const { username, password } = formData;
-    console.log("clicied");
     try {
       setLoading(true);
-      await login(username, password);
-      router.push("/book");
+      const response = await login(username, password);
+      if (response && response.status === 200) {
+        router.push("/book");
+      } else {
+        console.error("Login submission failed");
+        alert("Login submission failed. Please check your credentials.");
+      }
     } catch (error) {
       console.log("Error", error);
+      alert("Login submission failed. Please check your credentials.");
     } finally {
       setLoading(false);
     }
@@ -40,7 +43,7 @@ function Login() {
     <div className={styles.container}>
       <div className={styles.formContainer}>
         <h2>Login</h2>
-        <form onSubmit={handleSubmit}>
+        <form>
           <div className={styles.FormGroup}>
             <div className={styles.Label}>Username</div>
             <input
@@ -63,26 +66,28 @@ function Login() {
               required
             />
           </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "1rem",
-            }}
-          >
-            <button className={styles.SubmitButton} type="submit">
-              Login
-            </button>
-            or
-            <button
-              className={styles.SubmitButton}
-              onClick={() => router.push("/register")}
-            >
-              Register
-            </button>
-            {loading && <div>Loading...</div>}
-          </div>
         </form>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "1rem",
+          }}
+        >
+          <button
+            className={styles.SubmitButton}
+            onClick={() => handleSubmit()}
+          >
+            {loading ? <div>Logging...</div> : "Login"}
+          </button>
+          or
+          <button
+            className={styles.SubmitButton}
+            onClick={() => router.push("/register")}
+          >
+            Register
+          </button>
+        </div>
       </div>
     </div>
   );

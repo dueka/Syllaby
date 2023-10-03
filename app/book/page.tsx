@@ -17,13 +17,24 @@ function Book() {
   const [newSectionData, setNewSectionData] = useState({ title: "" });
   const [isBookFormVisible, setIsBookFormVisible] = useState(true);
   const [isSectionAdded, setIsSectionAdded] = useState(false);
-  const { authenticated } = useAuth();
+  const { authenticated, logout } = useAuth();
+  const userRole = window.localStorage.getItem("role");
 
   useEffect(() => {
     if (!authenticated) {
       router.push("/login");
     }
   }, [authenticated, router]);
+
+  const handleLogout = () => {
+    console.log("clicied");
+    try {
+      logout();
+      router.push("/login");
+    } catch (error) {
+      console.log("Error", error);
+    }
+  };
 
   const createBook = () => {
     const newBook: Book = {
@@ -137,45 +148,57 @@ function Book() {
           <section className={styles.openBook}>
             <header>
               <h1>Book and Sections</h1>
+              <button
+                className={styles.addSectionButton}
+                style={{
+                  backgroundColor: "red",
+                }}
+                onClick={() => handleLogout()}
+              >
+                Logout
+              </button>
             </header>
+
             <article>
               {isBookFormVisible ? (
                 <>
                   <h2 className={styles.chapterTitle}>Syllaby Book</h2>
-                  <form className={styles.form}>
-                    <label>
-                      Book Name:
-                      <input
-                        type="text"
-                        value={newBookData.title}
-                        onChange={(e) =>
-                          setNewBookData({
-                            ...newBookData,
-                            title: e.target.value,
-                          })
-                        }
-                      />
-                    </label>
-                    <label>
-                      Book Description:
-                      <textarea
-                        value={newBookData.description}
-                        onChange={(e) =>
-                          setNewBookData({
-                            ...newBookData,
-                            description: e.target.value,
-                          })
-                        }
-                      />
-                    </label>
-                    <button
-                      type="button"
-                      onClick={createBook}
-                      disabled={newBookData.title.trim() === ""}
-                    >
-                      Create Book
-                    </button>
-                  </form>
+                  {userRole === "Author" && (
+                    <form className={styles.form}>
+                      <label>
+                        Book Name:
+                        <input
+                          type="text"
+                          value={newBookData.title}
+                          onChange={(e) =>
+                            setNewBookData({
+                              ...newBookData,
+                              title: e.target.value,
+                            })
+                          }
+                        />
+                      </label>
+                      <label>
+                        Book Description:
+                        <textarea
+                          value={newBookData.description}
+                          onChange={(e) =>
+                            setNewBookData({
+                              ...newBookData,
+                              description: e.target.value,
+                            })
+                          }
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onClick={createBook}
+                        disabled={newBookData.title.trim() === ""}
+                      >
+                        Create Book
+                      </button>
+                    </form>
+                  )}
                 </>
               ) : (
                 <>
@@ -183,7 +206,7 @@ function Book() {
                   <p>
                     {currentBook && (
                       <div className={styles.book}>
-                        {!isSectionAdded && (
+                        {userRole === "Author" && !isSectionAdded && (
                           <button
                             onClick={addSection}
                             className={styles.addSectionButton}

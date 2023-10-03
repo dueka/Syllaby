@@ -31,7 +31,7 @@ async function writeData(data: any) {
 
 export async function createUser(userData: any) {
   try {
-    const { username, password } = userData;
+    const { username, password, role } = userData;
     const db = await readData();
     const existingUser = db.users.find(
       (user: any) => user.username === username
@@ -46,6 +46,7 @@ export async function createUser(userData: any) {
       id: db.users.length + 1,
       username,
       password: hashedPassword,
+      role,
     };
     db.users.push(newUser);
     await writeData(db);

@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Book App for SyllabyCreate",
-  description: "Create books and sections",
+  description: "|| Create books and sections",
 };
 
 export default function RootLayout({

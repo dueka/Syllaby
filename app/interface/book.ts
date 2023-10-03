@@ -3,8 +3,13 @@ export interface Book {
   title: string;
   description: string;
   sections: SectionInterface[];
+  collaborators: Collaborator[];
 }
-
+export interface Collaborator {
+  id: number;
+  username: string;
+  role: string;
+}
 export interface SectionInterface {
   id: number;
   title: string;

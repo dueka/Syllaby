@@ -119,11 +119,6 @@
   line-height: 1.5;
 }
 
-.openBook article *:not(.chapterTitle):not(hr):not(dl) {
-  /* margin: 0 auto; */
-  max-width: 28.125em;
-}
-
 .openBook article p {
   text-indent: 2em;
 }

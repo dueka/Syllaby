@@ -37,9 +37,7 @@ function Subsection({
     setIsAddingSubsection(false);
   };
 
-  // const isAddSubsectionDisabled = newSubsectionTitle.trim() === "";
-  const isAddSubsectionDisabled =
-    isEditing || isAddingSubsection || newSubsectionTitle.trim() === "";
+  const isAddSubsectionDisabled = newSubsectionTitle.trim() === "";
 
   return (
     <div className={styles.subsection}>
@@ -76,7 +74,7 @@ function Subsection({
             />
             <button
               onClick={handleAddSubsection}
-              // disabled={isAddSubsectionDisabled}
+              disabled={isAddSubsectionDisabled}
             >
               Add Subsection
             </button>

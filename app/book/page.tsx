@@ -7,6 +7,11 @@ import { Section } from "./Section";
 import { useAuth } from "../auth/auth";
 import BookForm from "./form/BookForm";
 import CollaboratorSection from "./Collaboration";
+import {
+  saveBookToServer,
+  saveSectionToServer,
+  saveSubsectionToServer,
+} from "./functions/saveBook";
 
 function Book() {
   const localStorageKey = "bookData";
@@ -14,6 +19,7 @@ function Book() {
   const userRole = window.localStorage.getItem("role");
   const router = useRouter();
 
+  const [book, setBook] = useState<Book | null>(null);
   const [books, setBooks] = useState<Book[]>([]);
   const [currentBook, setCurrentBook] = useState<Book | null>(null);
   const [newSectionData, setNewSectionData] = useState({ title: "" });
@@ -28,6 +34,13 @@ function Book() {
       router.push("/login");
     }
   }, [authenticated, router]);
+
+  useEffect(() => {
+    // Initialize the book data from localStorage or fetch from the server
+    const savedData = localStorage.getItem(localStorageKey);
+    const savedBookData = savedData ? JSON.parse(savedData)?.book : null;
+    setBook(savedBookData);
+  }, []);
   const updateLocalStorage = (updatedBooks: any) => {
     const savedData = localStorage.getItem(localStorageKey);
     const savedDataObj = savedData ? JSON.parse(savedData) : {};
@@ -92,7 +105,7 @@ function Book() {
     console.log("clicied");
     try {
       logout();
-      router.push("/login");
+      router.push("/");
     } catch (error) {
       console.log("Error", error);
     }
@@ -107,6 +120,9 @@ function Book() {
       sections: [],
       collaborators: [],
     };
+
+    saveBookToServer(newBook);
+
     setBooks([...books, newBook]);
     setCurrentBook(newBook);
     setIsBookFormVisible(false);
@@ -122,6 +138,9 @@ function Book() {
         newSectionData.title || `Section ${currentBook.sections.length + 1}`,
       subsections: [],
     };
+
+    saveSectionToServer(newSection);
+
     setCurrentBook((prevBook) => {
       if (!prevBook) return null;
       setIsSectionAdded(true);
@@ -149,6 +168,15 @@ function Book() {
       );
       return { ...prevBook, sections: updatedSections };
     });
+
+    const newSubsection = {
+      id: Date.now(),
+      title: title || `Subsection ${currentBook.sections.length + 1}`,
+      subsections: [],
+    };
+
+    // Send the new subsection data to the server
+    saveSubsectionToServer(newSubsection);
 
     const updatedBooks = books.map((book) =>
       book.id === currentBook.id
